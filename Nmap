@@ -1,0 +1,260 @@
+#!/bin/bash
+
+
+
+################################################
+
+#nmap -sP 192.168.0.1-255 | grep 192 | cut -d ' ' -f 5 > ips.txt
+
+#nmap -O -iL ips.txt
+
+#Script para facilitar o escaneamento de rede com o nmap
+
+################################################
+#Colors
+white="\033[1;37m"
+grey="\033[0;37m"
+purple="\033[0;35m"
+red="\033[1;31m"
+green="\033[1;32m"
+yellow="\033[1;33m"
+cyan="\033[0;36m"
+cafe="\033[0;33m"
+fiuscha="\033[0;35m"
+blue="\033[1;34m"
+transparent="\e[0m"
+reseted="\033[0m"
+
+iniciais="iniciais.tmp"
+
+################################################
+#banner
+function banner () {
+clear
+echo -e "$cyan"
+echo "			 	 	 ███╗   ██╗██╗   ██╗██╗  ██╗███████╗██████╗ ███████╗    ██████╗ ██████╗" 
+echo "				  	 ████╗  ██║██║   ██║██║ ██╔╝██╔════╝██╔══██╗██╔════╝    ██╔══██╗██╔══██╗"
+echo "					 ██╔██╗ ██║██║   ██║█████╔╝ █████╗  ██████╔╝███████╗    ██████╔╝██████╔╝"
+echo "					 ██║╚██╗██║██║   ██║██╔═██╗ ██╔══╝  ██╔══██╗╚════██║    ██╔══██╗██╔══██╗"
+echo "					 ██║ ╚████║╚██████╔╝██║  ██╗███████╗██║  ██║███████║    ██████╔╝██║  ██║"
+echo "					 ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝    ╚═════╝ ╚═╝  ╚═╝"
+echo -e "		    				 $white Desenvolvido por:$cyan TheNuke$white Email:$cyan thenuke@protonmail.com$reseted" 
+echo -e "			$white 		   	    Carteira BitCoin:$cyan 1EsjJNgFQ7noJevGm169GgRP5H8fMaE8a$reseted"
+echo
+echo
+echo
+
+
+}
+################################################
+home ()
+{
+banner
+echo -e "		1) Iniciar Coleta de dados da rede"
+echo -e "		2) Ler Log de saida e descobrir sistemas"
+echo -e "		3) Apagar Logs"
+echo -e "	$red	0) Sair$reseted"
+echo
+echo -e "	$blue	C) Configurar pela Primeira vez$reseted"
+
+
+	while :
+		do
+	read -p "Opção: " -n 1 home
+	echo
+	case $home in
+
+	1) menu1;;
+	2) menu2;;
+	3) menu3;;
+	c|C) mkdir log
+		echo -e "Configuração Finalizada!"
+		sleep 3
+		home;;
+	0) exit;;
+	*) 	echo -e "$red Opção Inválida!$reseted"
+		sleep 3;
+		home;;
+
+
+
+
+
+esac
+done
+
+}
+################################################
+scanmode ()
+{
+banner;
+echo -e "$blue Qual tipo de scan quer usar? $yellow(1| -sS)$blue ou $red(2| -sP)$blue \<(Recomendado)$reseted"
+read -p ": " -n 1 modoscan
+
+	if [ $modoscan = "1" ]; 
+	then 
+	modo='-sS'
+
+	elif [ $modoscan = "2" ];
+	then
+	modo='-sP'
+
+	else [ $modoscan = "*" ];
+	echo -e "$red Valor Inválido Escolha 1-para (-sS) ou 2-para (-sP)! "
+	sleep 3
+	scanmode
+	
+	fi
+}
+################################################
+menu1 ()
+{
+banner;
+echo -e "$cyan Qual o IP da rede?$reseted"
+read -p ": " ipdarede
+sleep 0.025
+banner;
+rm *.tmp
+echo "$ipdarede" | cut -d '.' -f 1 >> iniciais.tmp
+scanmode;
+sleep 0.025
+banner;
+echo -e "$grey Qual o nome para o log do scan?$reseted"
+ls log/
+echo
+cd log/
+read -e -p ": " log
+sleep 0.025
+cd ..
+saida;
+}
+saida ()
+{
+banner;
+echo -e "$white As informações estão corretas?$reseted"
+echo -e "$cyan Ip:$white $ipdarede-255$reseted"
+sleep 0.025
+echo -e "$cyan Iniciais do ip:$white `cat iniciais.tmp` $reseted"
+sleep 0.025
+
+echo -e "$cyan Modo de operação:$white $modo$reseted"
+sleep 0.025
+echo -e "$cyan Nome do arquivo de log:$white $log.log$reseted"
+sleep 0.025
+formulario;
+}
+################################################
+continuar ()
+{
+	read -p "Continuar? S/n " -n 1 continuar
+	echo
+	if [ $continuar = "S" ]
+		then
+		home;
+	elif [ $continuar = "n" ]
+		then
+		continuar;
+	else [ $continuar = "*" ]
+		echo -e "$red Opção Inválida!$reseted"
+		sleep 2
+		continuar;
+
+	fi
+
+}
+################################################
+formulario ()
+{
+echo
+read -p "Confirmar S/n? " -n 1 formulario
+echo
+	if [ $formulario = "S" ] 
+	then
+		nmap $modo $ipdarede-255 | grep `cat iniciais.tmp` | cut -d ' ' -f 5 >> log/$log.log
+		sleep 3
+		banner
+		echo -e " Escaneamento Completo aquivo salvo em$cyan `pwd`/log/$log.log $reseted"
+		sleep 5
+		echo
+		echo -e "$red Agora leia a o log com a opção$yellow 2$reseted"
+		sleep 3
+		echo
+		continuar;				
+
+	elif [ $formulario = "n" ]
+	then
+		echo -e "$red reiniciando$reseted"
+		sleep 3
+		menu1;
+
+	else [ $formulario = "*" ]
+		echo -e "$red Entrada Inválida!$reseted"
+		sleep 3
+		saida;
+
+	fi
+	
+
+}
+################################################
+menu2 ()
+{
+banner;
+cd log/
+echo -e "$cyan Qual log Deseja ler?$yellow"
+ls
+echo -e "$reseted"
+read -e -p ":" log2
+echo 
+echo -e "$cyan Iniciando escaneamento$reseted"
+echo
+sudo nmap -O -iL $log2
+cd ..
+sleep 3
+echo
+echo -e "$cyan Escaneamento Concluido!$reseted"
+
+menu22;
+}
+
+menu22 ()
+{
+echo -e "$red"
+read -p "Voltar ao menu inicial? S/n " -n 1 simounao
+echo
+	if [ $simounao = "S" ]
+	then
+	home
+	
+	elif [ $simounao = "n" ]
+	then
+	exit
+
+	else [ $simounao = "*" ]
+	echo -e "$red Opção Invalida!$reseted"
+	sleep 3
+	menu22;
+	
+	fi
+echo -e "$reseted"
+}
+################################################
+menu3 ()
+{
+cd log/
+echo -e "Quais Logs Deseja Apagar?$yellow"
+ls
+echo -e "$reseted"
+read -e -p": " apagar
+echo
+rm $apagar
+sleep 3
+echo
+echo -e "$blue Concluido! Voltando ao menu inicial!$reseted"
+sleep 3
+cd ..
+home;
+
+}
+################################################
+home;
